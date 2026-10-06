@@ -1,0 +1,3 @@
+# 这些文件不部署到 Vercel（server.js 是本地开发用的，别把后端源码暴露到线上）
+server.js
+.env

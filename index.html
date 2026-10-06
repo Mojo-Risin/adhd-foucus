@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>澄时 ClearTime · 专注辅助</title>
+<style>
+  /* ============ 设计变量（宁静雾蓝·极简专注） ============ */
+  :root {
+    --bg:          #F7F6F2;
+    --surface:     #FFFFFF;
+    --ink:         #2E3440;
+    --ink-soft:    #6B7280;
+    --ink-faint:   #9AA3AD;
+    --blue:        #7C9CBF;
+    --blue-deep:   #5B7E9E;
+    --blue-soft:   #EDF1F6;
+    --sage:        #A8BCA1;
+    --sage-deep:   #7A9B72;
+    --line:        #E7E4DC;
+    --radius-lg:   24px;
+    --radius-md:   16px;
+    --radius-sm:   12px;
+    --shadow-soft: 0 2px 8px rgba(46, 52, 64, 0.04), 0 12px 32px rgba(46, 52, 64, 0.06);
+    --shadow-lift: 0 6px 16px rgba(46, 52, 64, 0.08), 0 24px 56px rgba(46, 52, 64, 0.12);
+    --font: "Inter", -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei",
+            "Noto Sans SC", "Hiragino Sans GB", sans-serif;
+    --ease-out: cubic-bezier(.22, 1, .36, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ============ 背景光晕 ============ */
+  .glow {
+    position: fixed;
+    width: 55vw; height: 55vw;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-a {
+    top: -22%; left: -12%;
+    background: radial-gradient(circle, #C9DAEC 0%, transparent 70%);
+    animation: drift-a 28s var(--ease-out) infinite alternate;
+  }
+  .glow-b {
+    bottom: -28%; right: -14%;
+    background: radial-gradient(circle, #DCE7D9 0%, transparent 70%);
+    animation: drift-b 34s var(--ease-out) infinite alternate;
+  }
+  @keyframes drift-a { from { transform: translate(0,0) scale(1); } to { transform: translate(9vw, 7vh) scale(1.18); } }
+  @keyframes drift-b { from { transform: translate(0,0) scale(1.18); } to { transform: translate(-7vw, -6vh) scale(1); } }
+
+  header, main { position: relative; z-index: 1; }
+
+  /* ============ 入场动画 ============ */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  header          { animation: rise .7s var(--ease-out) both; }
+  .intro          { animation: rise .7s .05s var(--ease-out) both; }
+  .timer-card     { animation: rise .7s .12s var(--ease-out) both; }
+  .breakdown-card { animation: rise .7s .12s var(--ease-out) both; }
+  .room-card      { animation: rise .7s .12s var(--ease-out) both; }
+  .note           { animation: rise .7s .20s var(--ease-out) both; }
+
+  /* ============ 顶栏 ============ */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    max-width: 1080px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: default;
+  }
+  .brand .dot {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--blue-deep));
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.12), inset 0 2px 3px rgba(255,255,255,0.5);
+    transition: transform .5s var(--ease-out);
+  }
+  .brand:hover .dot { transform: scale(1.12) rotate(20deg); }
+  .brand small { font-weight: 400; color: var(--ink-faint); font-size: 13px; margin-left: 2px; }
+
+  nav { display: flex; gap: 8px; }
+
+  nav a {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color .25s ease, background .25s ease, box-shadow .25s ease;
+  }
+  nav a:hover { color: var(--ink); background: rgba(124,156,191,0.10); }
+  nav a.active { color: var(--ink); background: var(--surface); box-shadow: var(--shadow-soft); font-weight: 500; }
+
+  /* ============ 主内容 ============ */
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 40px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .view { width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .view.hidden { display: none; }
+
+  .intro { text-align: center; margin-bottom: 40px; }
+  .intro h1 {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-bottom: 12px;
+  }
+  .intro p {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 460px;
+  }
+
+  /* ============ 计时卡片 ============ */
+  .timer-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    transition: box-shadow .5s var(--ease-out), transform .5s var(--ease-out);
+  }
+  .timer-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+
+  .presets { display: flex; gap: 10px; justify-content: center; }
+  .presets button {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: all .25s var(--ease-out);
+  }
+  .presets button:hover { border-color: var(--blue); color: var(--blue-deep); transform: translateY(-1px); }
+  .presets button.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(124,156,191,0.35);
+  }
+
+  .pool {
+    position: relative;
+    height: 340px;
+    background: var(--blue-soft);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: inset 0 2px 8px rgba(46,52,64,0.05);
+    transition: background .8s ease;
+  }
+  .pool .fill {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 100%;
+    background: linear-gradient(180deg, #8FB0CE 0%, var(--blue-deep) 100%);
+    transition: height .15s linear, background .6s ease;
+    will-change: height;
+  }
+  .pool .fill::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
+    border-radius: 6px 6px 0 0;
+  }
+  .pool .fill::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+    animation: shimmer 5.5s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { left: -60%; } 55%, 100% { left: 115%; } }
+
+  .pool.paused .fill { animation: breathe 3s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+  .pool.done { background: #E9EFE6; }
+  .pool.done .fill { background: linear-gradient(180deg, #BCD0BC 0%, var(--sage) 100%); }
+
+  .pool .status {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+    transition: opacity .3s ease;
+  }
+
+  .status-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 10px rgba(46,52,64,0.10);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .status-icon svg { width: 44px; height: 44px; display: block; }
+
+  .ring, .core { transform-box: fill-box; transform-origin: center; }
+  .ring { animation: ring 2.7s ease-out infinite; }
+  .r2 { animation-delay: .9s; }
+  .r3 { animation-delay: 1.8s; }
+  @keyframes ring {
+    0%   { transform: scale(1);   opacity: .85; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+  .core { animation: corePulse 2.7s ease-in-out infinite; }
+  @keyframes corePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.28); } }
+
+  .bar { animation: barBreathe 2s ease-in-out infinite; }
+  .b2  { animation-delay: 1s; }
+  @keyframes barBreathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+
+  .check { stroke-dasharray: 34; stroke-dashoffset: 34; animation: draw .6s var(--ease-out) forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .pool .status .label {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    padding: 6px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(46,52,64,0.08);
+  }
+  .pool .status .label.pop { animation: pop .45s var(--ease-out); }
+  @keyframes pop { 0% { transform: scale(.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+  .pool .status .time {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.12em;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+  }
+  .pool.hide-num .status .time { display: none; }
+
+  /* ============ 按钮 ============ */
+  .controls { display: flex; align-items: center; justify-content: center; gap: 14px; }
+
+  .btn {
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 34px;
+    cursor: pointer;
+    transition: transform .25s var(--ease-out), box-shadow .3s var(--ease-out), background .25s ease;
+  }
+  .btn.primary {
+    background: var(--blue);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(124,156,191,0.40);
+  }
+  .btn.primary:hover { background: var(--blue-deep); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(124,156,191,0.50); }
+  .btn.primary:active { transform: translateY(0) scale(0.98); }
+  .btn.primary::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -150%;
+    width: 60%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+  }
+  .btn.primary:hover::after { animation: sheen .8s var(--ease-out); }
+  @keyframes sheen { to { left: 150%; } }
+
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 14px 20px;
+  }
+  .btn.ghost:hover { color: var(--ink); background: rgba(124,156,191,0.08); }
+
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: scale(0);
+    animation: ripple .6s ease-out forwards;
+  }
+  .btn.primary .ripple { background: rgba(255,255,255,0.45); }
+  .btn.ghost .ripple   { background: rgba(124,156,191,0.28); }
+  @keyframes ripple { to { transform: scale(2.6); opacity: 0; } }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  .switch {
+    position: relative;
+    width: 40px; height: 22px;
+    background: #D9DDE3;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .25s ease;
+  }
+  .switch.on { background: var(--blue); }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform .25s var(--ease-out);
+  }
+  .switch.on::after { transform: translateX(18px); }
+
+  /* ============ 拆解卡片 ============ */
+  .breakdown-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: box-shadow .5s var(--ease-out), transform .5s var(--ease-out);
+  }
+  .breakdown-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+
+  .input-row { display: flex; gap: 10px; }
+  .input-row input {
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 13px 16px;
+    background: #FBFAF8;
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  .input-row input::placeholder { color: var(--ink-faint); }
+  .input-row input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(124,156,191,0.15);
+  }
+  .input-row input.invalid { border-color: #D98A8A; animation: shake .4s ease; }
+  @keyframes shake { 0%,100% { transform: translateX(0);} 25% { transform: translateX(-4px);} 75% { transform: translateX(4px);} }
+  .input-row .btn { flex: none; padding: 13px 26px; }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 24px 0;
+  }
+  .loading.hidden { display: none; }
+  .dots { display: flex; gap: 5px; }
+  .dots span {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--blue);
+    animation: bounce 1s ease-in-out infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: .15s; }
+  .dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); opacity: .4;} 50% { transform: translateY(-6px); opacity: 1;} }
+
+  .result.hidden { display: none; }
+
+  .task-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+  .task-label b { color: var(--ink); font-weight: 600; }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--blue-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--blue), var(--sage));
+    border-radius: 999px;
+    transition: width .5s var(--ease-out);
+  }
+  .progress-text { font-size: 12px; color: var(--ink-faint); text-align: right; margin-bottom: 14px; letter-spacing: .04em; }
+
+  .steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #FBFAF8;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    transition: all .3s var(--ease-out);
+    animation: rise .5s var(--ease-out) both;
+  }
+  .step:hover { border-color: var(--blue); transform: translateX(2px); }
+
+  .check-btn {
+    flex: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid #C9D4E0;
+    background: transparent;
+    cursor: pointer;
+    margin-top: 1px;
+    position: relative;
+    transition: all .25s var(--ease-out);
+  }
+  .check-btn:hover { border-color: var(--blue); }
+  .step.done .check-btn { background: var(--sage); border-color: var(--sage); }
+  .step.done .check-btn::after {
+    content: "";
+    position: absolute;
+    left: 6px; top: 2px;
+    width: 8px; height: 13px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+    animation: pop .3s var(--ease-out);
+  }
+
+  .step-body { display: flex; flex-direction: column; gap: 3px; }
+  .step-text { font-size: 15px; color: var(--ink); line-height: 1.5; transition: color .3s ease; }
+  .step-min { font-size: 12px; color: var(--ink-faint); }
+  .step.done .step-text { color: var(--ink-faint); text-decoration: line-through; }
+  .step.done { background: #F4F4F0; border-color: #E4E4DD; }
+
+  .celebrate {
+    margin-top: 16px;
+    text-align: center;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, #E9EFE6, #DFEAD9);
+    color: #5B7A5B;
+    font-weight: 500;
+    animation: pop .5s var(--ease-out);
+  }
+
+  /* ============ 共学房间 ============ */
+  .room-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 26px 32px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    transition: box-shadow .5s var(--ease-out), transform .5s var(--ease-out);
+  }
+  .room-card:hover { box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+
+  .room-header { display: flex; align-items: center; justify-content: center; }
+  .presence {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: #F1F4F7;
+  }
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--sage);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(168,188,161,0.5); }
+    70%  { box-shadow: 0 0 0 8px rgba(168,188,161,0); }
+    100% { box-shadow: 0 0 0 0 rgba(168,188,161,0); }
+  }
+
+  .room-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    padding: 10px 0;
+  }
+
+  /* 虚拟同伴 */
+  .companion {
+    width: 150px; height: 150px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: breathe 4s ease-in-out infinite;
+  }
+  .companion svg { width: 150px; height: 150px; }
+  .head, .body, .pen, .eye { transform-box: fill-box; transform-origin: center; }
+
+  /* 专注时：头轻微左右摇摆（像在认真读书） */
+  .room-card.focus .head { animation: sway 3s ease-in-out infinite; }
+  @keyframes sway {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    30%      { transform: translateX(-1.6px) rotate(-1.6deg); }
+    70%      { transform: translateX(1.6px) rotate(1.6deg); }
+  }
+
+  /* 眨眼（常驻，让小人「活」起来） */
+  .eye { animation: blink 4.2s infinite; }
+  @keyframes blink {
+    0%, 91%, 100% { transform: scaleY(1); }
+    94%           { transform: scaleY(0.08); }
+    97%           { transform: scaleY(1); }
+  }
+
+  /* 写字的手（常驻） */
+  .pen { animation: write 1.5s ease-in-out infinite; }
+  @keyframes write {
+    0%, 100% { transform: translateX(-4px) rotate(-4deg); }
+    50%      { transform: translateX(4px) rotate(4deg); }
+  }
+
+  /* 呼吸 */
+  @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+
+  /* 完成弹跳 */
+  .room-card.done .companion { animation: celebrateBounce .6s var(--ease-out); }
+  @keyframes celebrateBounce { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+  /* 圆环计时器 */
+  .ring-timer {
+    position: relative;
+    width: 150px; height: 150px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ring-timer svg { position: absolute; inset: 0; }
+  .ring-track { fill: none; stroke: var(--blue-soft); stroke-width: 10; }
+  .ring-progress {
+    fill: none;
+    stroke: var(--blue);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 377;
+    stroke-dashoffset: 0;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset .15s linear, stroke .6s ease;
+  }
+  .room-card.done .ring-progress { stroke: var(--sage); }
+  .ring-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .ring-time {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+  .ring-state { font-size: 12px; color: var(--ink-faint); letter-spacing: 0.08em; }
+
+  /* ============ 理念说明 ============ */
+  .note {
+    margin-top: 28px;
+    max-width: 560px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink-faint);
+  }
+  .note strong { color: var(--ink-soft); font-weight: 500; }
+
+  /* ============ 无障碍 ============ */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow glow-a"></div>
+<div class="glow glow-b"></div>
+
+<header>
+  <div class="brand">
+    <span class="dot"></span>
+    澄时 <small>ClearTime</small>
+  </div>
+  <nav>
+    <a data-view="breakdown">拆解</a>
+    <a data-view="timer" class="active">计时</a>
+    <a data-view="bodydouble">共学</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ 视图：计时 ============ -->
+  <section class="view" id="view-timer">
+    <div class="intro">
+      <h1>让时间变得看得见</h1>
+      <p>不给大脑看数字，只看「还剩多少」。专为容易被时间悄悄溜走的人设计。</p>
+    </div>
+
+    <div class="timer-card">
+      <div class="presets">
+        <button data-min="5">5 分钟</button>
+        <button data-min="15">15 分钟</button>
+        <button data-min="25" class="active">25 分钟</button>
+      </div>
+
+      <div class="pool hide-num" id="pool">
+        <div class="fill" id="fill"></div>
+        <div class="status">
+          <div class="status-icon" id="statusIcon"></div>
+          <span class="label" id="statusLabel">准备开始</span>
+          <span class="time" id="statusTime">25:00</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn ghost" id="resetBtn">重置</button>
+        <button class="btn primary" id="toggleBtn">开始</button>
+      </div>
+
+      <div class="toggle-row">
+        <span>纯视觉（不显示数字）</span>
+        <div class="switch on" id="numSwitch" title="切换数字显示"></div>
+        <span>显示数字</span>
+      </div>
+    </div>
+
+    <p class="note">
+      <strong>设计理念：</strong>ADHD 大脑对「时间流逝」的感知很弱（time blindness）。
+      澄时把抽象的倒计时，变成一个<strong>肉眼可见在消退的色块</strong>，
+      用视觉代替数字，让「专注了多久、还剩多少」变成一种直觉。
+    </p>
+  </section>
+
+  <!-- ============ 视图：拆解 ============ -->
+  <section class="view hidden" id="view-breakdown">
+    <div class="intro">
+      <h1>把大任务拆成小步</h1>
+      <p>输入一个让你头疼的任务，澄时帮你拆成一个个 2 分钟就能动手的小步骤。</p>
+    </div>
+
+    <div class="breakdown-card">
+      <div class="input-row">
+        <input type="text" id="taskInput" placeholder="例如：写一篇 2000 字的历史论文" />
+        <button class="btn primary" id="breakBtn">拆解</button>
+      </div>
+
+      <div class="loading hidden" id="loading">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <span>正在拆解…</span>
+      </div>
+
+      <div class="result hidden" id="result">
+        <div class="task-label" id="taskLabel"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">0 / 0 步</div>
+        <ul class="steps" id="steps"></ul>
+      </div>
+    </div>
+
+    <p class="note">
+      <strong>为什么有用：</strong>ADHD 大脑面对「写论文」这种大任务会直接宕机（task initiation）。
+      把它拆成「先列一个论点」「只写开头 3 句话」这种<strong>小到不会抗拒的下一步</strong>，启动就变容易了。
+    </p>
+  </section>
+
+  <!-- ============ 视图：共学 ============ -->
+  <section class="view hidden" id="view-bodydouble">
+    <div class="intro">
+      <h1>一起学，更容易开始</h1>
+      <p>Body Doubling：有个「人」在旁边陪着你，任务启动就不再孤单。</p>
+    </div>
+    <div class="room-card" id="room">
+      <div class="room-header">
+        <span class="presence"><span class="pulse-dot"></span><span id="presenceText">你 · 同伴 准备共学</span></span>
+      </div>
+
+      <div class="room-body">
+        <div class="companion">
+          <svg viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="headGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#A7C0D8"/>
+                <stop offset="1" stop-color="#7C9CBF"/>
+              </linearGradient>
+              <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#6B8CAE"/>
+                <stop offset="1" stop-color="#557A9C"/>
+              </linearGradient>
+            </defs>
+
+            <!-- 身体 + 手臂 -->
+            <g class="body">
+              <rect x="50" y="94" width="60" height="36" rx="18" fill="#8FB0CE"/>
+              <path d="M56 100 Q44 108 46 120" stroke="#7C9CBF" stroke-width="11" stroke-linecap="round" fill="none"/>
+              <path d="M104 100 Q116 106 114 118" stroke="#7C9CBF" stroke-width="11" stroke-linecap="round" fill="none"/>
+            </g>
+
+            <!-- 头 -->
+            <g class="head">
+              <circle cx="80" cy="50" r="35" fill="url(#hairGrad)"/>
+              <circle cx="80" cy="62" r="32" fill="url(#headGrad)"/>
+              <path d="M48 52 Q44 62 48 70" stroke="#557A9C" stroke-width="6" stroke-linecap="round" fill="none"/>
+              <path d="M112 52 Q116 62 112 70" stroke="#557A9C" stroke-width="6" stroke-linecap="round" fill="none"/>
+
+              <g class="eye">
+                <ellipse cx="68" cy="62" rx="8" ry="10" fill="#fff"/>
+                <circle cx="69" cy="63" r="4.5" fill="#3A4A5A"/>
+                <circle cx="71" cy="61" r="1.8" fill="#fff"/>
+              </g>
+              <g class="eye">
+                <ellipse cx="92" cy="62" rx="8" ry="10" fill="#fff"/>
+                <circle cx="93" cy="63" r="4.5" fill="#3A4A5A"/>
+                <circle cx="95" cy="61" r="1.8" fill="#fff"/>
+              </g>
+
+              <ellipse cx="60" cy="74" rx="6" ry="4" fill="#D8A9A9" opacity="0.55"/>
+              <ellipse cx="100" cy="74" rx="6" ry="4" fill="#D8A9A9" opacity="0.55"/>
+              <path d="M72 76 Q80 84 88 76" stroke="#3A4A5A" stroke-width="3" stroke-linecap="round" fill="none"/>
+            </g>
+
+            <!-- 桌子 -->
+            <rect x="22" y="126" width="116" height="11" rx="5.5" fill="#DCE4EC"/>
+
+            <!-- 拿笔的手（写字动画） -->
+            <g class="pen">
+              <circle cx="115" cy="112" r="7" fill="#8FB0CE"/>
+              <rect x="113" y="97" width="4" height="20" rx="2" fill="#557A9C" transform="rotate(15 115 107)"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="ring-timer">
+          <svg viewBox="0 0 140 140">
+            <circle class="ring-track" cx="70" cy="70" r="60"/>
+            <circle class="ring-progress" id="ringProgress" cx="70" cy="70" r="60"/>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-time" id="ringTime">25:00</span>
+            <span class="ring-state" id="ringState">准备开始</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn ghost" id="roomResetBtn">重置</button>
+        <button class="btn primary" id="roomToggleBtn">开始共学</button>
+      </div>
+    </div>
+
+    <p class="note">
+      <strong>设计理念：</strong>Body Doubling 是 ADHD 领域被广泛验证的方法——<strong>「有人在旁边」本身就能降低启动门槛</strong>。
+      澄时用一位安静的虚拟同伴 + 共享专注计时，制造这种「在场感」，让开始变得没那么难。
+    </p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  /* ================= 通用：tab 切换 ================= */
+  var navLinks = document.querySelectorAll('nav a');
+  var views = {
+    timer: document.getElementById('view-timer'),
+    breakdown: document.getElementById('view-breakdown'),
+    bodydouble: document.getElementById('view-bodydouble')
+  };
+
+  navLinks.forEach(function (a) {
+    a.addEventListener('click', function () {
+      var key = a.dataset.view;
+      navLinks.forEach(function (x) { x.classList.remove('active'); });
+      a.classList.add('active');
+      Object.keys(views).forEach(function (k) { views[k].classList.add('hidden'); });
+      views[key].classList.remove('hidden');
+    });
+  });
+
+  /* ================= 通用：按钮涟漪 ================= */
+  function bindRipple(btn) {
+    btn.addEventListener('click', function (e) {
+      var r = document.createElement('span');
+      r.className = 'ripple';
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      r.style.width = r.style.height = size + 'px';
+      r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      r.style.top  = (e.clientY - rect.top  - size / 2) + 'px';
+      btn.appendChild(r);
+      setTimeout(function () { r.remove(); }, 650);
+    });
+  }
+  document.querySelectorAll('.btn').forEach(bindRipple);
+
+  /* ================= 计时器 ================= */
+  var pool        = document.getElementById('pool');
+  var fill        = document.getElementById('fill');
+  var statusLabel = document.getElementById('statusLabel');
+  var statusTime  = document.getElementById('statusTime');
+  var statusIcon  = document.getElementById('statusIcon');
+  var toggleBtn   = document.getElementById('toggleBtn');
+  var resetBtn    = document.getElementById('resetBtn');
+  var numSwitch   = document.getElementById('numSwitch');
+  var presetBtns  = document.querySelectorAll('.presets button');
+
+  var totalMs = 25 * 60 * 1000;
+  var leftMs  = totalMs;
+  var running = false;
+  var timer   = null;
+  var lastTick = 0;
+  var showNum = false;
+
+  var topStart = [209, 40, 69], topEnd = [30, 48, 76];
+  var botStart = [209, 40, 55], botEnd = [25, 45, 62];
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function hslColor(h) { return 'hsl(' + h[0].toFixed(1) + ',' + h[1].toFixed(1) + '%,' + h[2].toFixed(1) + '%)'; }
+  function fillGradient(t) {
+    var top = [lerp(topStart[0], topEnd[0], t), lerp(topStart[1], topEnd[1], t), lerp(topStart[2], topEnd[2], t)];
+    var bot = [lerp(botStart[0], botEnd[0], t), lerp(botStart[1], botEnd[1], t), lerp(botStart[2], botEnd[2], t)];
+    return 'linear-gradient(180deg, ' + hslColor(top) + ' 0%, ' + hslColor(bot) + ' 100%)';
+  }
+
+  function format(ms) {
+    var s = Math.ceil(ms / 1000);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return (m < 10 ? '0' + m : m) + ':' + (r < 10 ? '0' + r : r);
+  }
+
+  function render() {
+    var ratio = leftMs / totalMs;
+    fill.style.height = (ratio * 100).toFixed(2) + '%';
+    statusTime.textContent = format(leftMs);
+    if (!pool.classList.contains('done')) {
+      fill.style.background = fillGradient(1 - ratio);
+    }
+  }
+
+  var ICONS = {
+    idle:   '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="15" fill="none" stroke="#C9D4E0" stroke-width="2"/><circle class="core" cx="24" cy="24" r="4.5" fill="#7C9CBF"/></svg>',
+    focus:  '<svg viewBox="0 0 48 48"><circle class="ring r1" cx="24" cy="24" r="9" fill="none" stroke="#7C9CBF" stroke-width="2"/><circle class="ring r2" cx="24" cy="24" r="9" fill="none" stroke="#7C9CBF" stroke-width="2"/><circle class="ring r3" cx="24" cy="24" r="9" fill="none" stroke="#7C9CBF" stroke-width="2"/><circle class="core" cx="24" cy="24" r="4.5" fill="#5B7E9E"/></svg>',
+    paused: '<svg viewBox="0 0 48 48"><rect class="bar b1" x="16" y="14" width="6" height="20" rx="3" fill="#7C9CBF"/><rect class="bar b2" x="26" y="14" width="6" height="20" rx="3" fill="#7C9CBF"/></svg>',
+    done:   '<svg viewBox="0 0 48 48"><path class="check" d="M13 25.5 L21 33 L36 17" fill="none" stroke="#7A9B72" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+
+  var LABELS = {
+    idle: '准备开始', focus: '专注中', paused: '已暂停', done: '完成啦，休息一下'
+  };
+
+  function setState(state) {
+    statusIcon.innerHTML = ICONS[state];
+    statusLabel.textContent = LABELS[state];
+    statusLabel.classList.remove('pop');
+    void statusLabel.offsetWidth;
+    statusLabel.classList.add('pop');
+  }
+
+  function setPreset(min, btn) {
+    totalMs = min * 60 * 1000;
+    leftMs  = totalMs;
+    running = false;
+    clearInterval(timer);
+    toggleBtn.textContent = '开始';
+    setState('idle');
+    pool.classList.remove('paused', 'done');
+    presetBtns.forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    render();
+  }
+
+  function tick() {
+    var now = Date.now();
+    var delta = now - lastTick;
+    lastTick = now;
+    leftMs -= delta;
+    if (leftMs <= 0) {
+      leftMs = 0;
+      running = false;
+      clearInterval(timer);
+      toggleBtn.textContent = '开始';
+      setState('done');
+      pool.classList.remove('paused');
+      pool.classList.add('done');
+      render();
+      return;
+    }
+    render();
+  }
+
+  function start() {
+    running = true;
+    lastTick = Date.now();
+    timer = setInterval(tick, 100);
+    toggleBtn.textContent = '暂停';
+    setState('focus');
+    pool.classList.remove('paused', 'done');
+  }
+
+  function pause() {
+    running = false;
+    clearInterval(timer);
+    toggleBtn.textContent = '继续';
+    setState('paused');
+    pool.classList.add('paused');
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    if (leftMs <= 0) { leftMs = totalMs; pool.classList.remove('done'); render(); }
+    if (running) pause(); else start();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    leftMs = totalMs;
+    running = false;
+    clearInterval(timer);
+    toggleBtn.textContent = '开始';
+    setState('idle');
+    pool.classList.remove('paused', 'done');
+    render();
+  });
+
+  presetBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setPreset(parseInt(btn.dataset.min, 10), btn);
+    });
+  });
+
+  numSwitch.addEventListener('click', function () {
+    showNum = !showNum;
+    numSwitch.classList.toggle('on', showNum);
+    pool.classList.toggle('hide-num', !showNum);
+  });
+
+  setState('idle');
+  render();
+
+  /* ================= 任务拆解 ================= */
+  var taskInput   = document.getElementById('taskInput');
+  var breakBtn    = document.getElementById('breakBtn');
+  var loading     = document.getElementById('loading');
+  var result      = document.getElementById('result');
+  var taskLabel   = document.getElementById('taskLabel');
+  var progressFill= document.getElementById('progressFill');
+  var progressText= document.getElementById('progressText');
+  var stepsEl     = document.getElementById('steps');
+  var stepCount   = 0;
+
+  // 本地模拟拆解：根据任务类型生成小步骤。
+  // 接真 AI 时，把这里换成对后端 /api/breakdown 的 fetch 调用即可。
+  function mockBreakdown(task) {
+    var t = task;
+    var isWrite  = /(写|作文|论文|报告|essay|文章|总结|稿)/i.test(t);
+    var isMemory = /(背|记|单词|复习|考试|默写|公式|古文|背诵)/i.test(t);
+    var isMath   = /(数学|题|练习|作业|计算|物理|化学|习题)/i.test(t);
+    var isRead   = /(读|预习|看书|阅读)/i.test(t);
+    var isClean  = /(整理|收拾|打扫|清理)/i.test(t);
+
+    if (isWrite) return [
+      { text: '花 3 分钟，用一句话写下这篇的核心观点', minutes: 3 },
+      { text: '列出提纲：开头 → 3 个要点 → 结尾', minutes: 5 },
+      { text: '只写开头段，写够 3 句话就停', minutes: 8 },
+      { text: '写第 1 个要点，写完立刻打勾', minutes: 15 },
+      { text: '写第 2、3 个要点', minutes: 20 },
+      { text: '写结尾，然后通读一遍改错别字', minutes: 10 }
+    ];
+    if (isMemory) return [
+      { text: '通读一遍材料，只标记完全不熟的部分', minutes: 3 },
+      { text: '把不熟的内容分成 3 小份', minutes: 2 },
+      { text: '背第 1 份，然后合上默写', minutes: 8 },
+      { text: '背第 2、3 份，各默写一次', minutes: 16 },
+      { text: '休息 5 分钟，回来整体自查一遍', minutes: 6 }
+    ];
+    if (isMath) return [
+      { text: '先做 1 道最基础的题，找回手感', minutes: 3 },
+      { text: '整理这部分的公式 / 知识点（写在小抄上）', minutes: 5 },
+      { text: '做 3 道中等题，错题当场看解析', minutes: 15 },
+      { text: '挑 1 道难题，计时 10 分钟挑战', minutes: 10 },
+      { text: '把今天错的知识点记进错题本', minutes: 5 }
+    ];
+    if (isRead) return [
+      { text: '看目录和标题，猜猜这一章要讲什么', minutes: 2 },
+      { text: '快速翻一遍，只看大小标题', minutes: 4 },
+      { text: '精读前 2 页，用一句话总结', minutes: 8 },
+      { text: '继续读完剩余部分，边读边画重点', minutes: 15 },
+      { text: '合上书，用 3 句话复述给「自己」听', minutes: 5 }
+    ];
+    if (isClean) return [
+      { text: '只收拾桌面最乱的一小块（先划个范围）', minutes: 5 },
+      { text: '把同类东西归到一起（书 / 文具 / 杂物）', minutes: 8 },
+      { text: '处理掉明显没用的东西', minutes: 5 },
+      { text: '给每样东西指定一个固定位置', minutes: 5 }
+    ];
+    return [
+      { text: '把这件事写成一个 20 字以内的小目标', minutes: 2 },
+      { text: '准备好要用的东西，只留这一件在眼前', minutes: 3 },
+      { text: '先做一个最小、最简单的开头（5 分钟）', minutes: 5 },
+      { text: '继续推进主体部分', minutes: 15 },
+      { text: '收尾，检查一遍有没有遗漏', minutes: 5 }
+    ];
+  }
+
+  function updateProgress() {
+    var total = stepsEl.querySelectorAll('.step').length;
+    var done  = stepsEl.querySelectorAll('.step.done').length;
+    progressFill.style.width = (total ? (done / total * 100) : 0) + '%';
+    progressText.textContent = done + ' / ' + total + ' 步';
+    if (total && done === total) {
+      var c = document.createElement('div');
+      c.className = 'celebrate';
+      c.textContent = '全部完成，做得漂亮 ✨';
+      result.appendChild(c);
+      setTimeout(function () { c.remove(); }, 2600);
+    }
+  }
+
+  function renderSteps(steps) {
+    stepsEl.innerHTML = '';
+    stepCount = 0;
+    steps.forEach(function (s, i) {
+      var li = document.createElement('li');
+      li.className = 'step';
+      li.style.animationDelay = (i * 70) + 'ms';
+
+      var btn = document.createElement('button');
+      btn.className = 'check-btn';
+      btn.title = '标记完成';
+
+      var body = document.createElement('div');
+      body.className = 'step-body';
+      var text = document.createElement('span');
+      text.className = 'step-text';
+      text.textContent = s.text;
+      var min = document.createElement('span');
+      min.className = 'step-min';
+      min.textContent = '约 ' + s.minutes + ' 分钟';
+      body.appendChild(text);
+      body.appendChild(min);
+
+      li.appendChild(btn);
+      li.appendChild(body);
+
+      btn.addEventListener('click', function () {
+        li.classList.toggle('done');
+        updateProgress();
+      });
+      stepsEl.appendChild(li);
+    });
+    updateProgress();
+  }
+
+  function setTaskLabel(task, count, suffix) {
+    taskLabel.textContent = '';
+    taskLabel.append(document.createTextNode('「'));
+    var b1 = document.createElement('b'); b1.textContent = task; taskLabel.append(b1);
+    taskLabel.append(document.createTextNode('」拆成了 '));
+    var b2 = document.createElement('b'); b2.textContent = count; taskLabel.append(b2);
+    taskLabel.append(document.createTextNode(' 步' + (suffix || '')));
+  }
+
+  function doBreakdown() {
+    var task = taskInput.value.trim();
+    if (!task) {
+      taskInput.classList.add('invalid');
+      setTimeout(function () { taskInput.classList.remove('invalid'); }, 500);
+      return;
+    }
+    loading.classList.remove('hidden');
+    result.classList.add('hidden');
+
+    // 调后端 /api/breakdown（真 AI）；后端没启动时回退到本地模拟
+    fetch('/api/breakdown', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: task })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.error) throw new Error(data.error);
+      setTaskLabel(task, data.steps.length);
+      renderSteps(data.steps);
+      loading.classList.add('hidden');
+      result.classList.remove('hidden');
+    })
+    .catch(function () {
+      var steps = mockBreakdown(task);
+      setTaskLabel(task, steps.length, '（本地模拟）');
+      renderSteps(steps);
+      loading.classList.add('hidden');
+      result.classList.remove('hidden');
+    });
+  }
+
+  breakBtn.addEventListener('click', doBreakdown);
+  taskInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doBreakdown();
+  });
+
+  /* ================= Body Doubling 共学 ================= */
+  var room          = document.getElementById('room');
+  var roomToggleBtn = document.getElementById('roomToggleBtn');
+  var roomResetBtn  = document.getElementById('roomResetBtn');
+  var ringProgress  = document.getElementById('ringProgress');
+  var ringTime      = document.getElementById('ringTime');
+  var ringState     = document.getElementById('ringState');
+  var presenceText  = document.getElementById('presenceText');
+
+  var ROOM_TOTAL = 25 * 60 * 1000;
+  var roomLeft    = ROOM_TOTAL;
+  var roomRunning = false;
+  var roomTimer   = null;
+  var roomLast    = 0;
+  var RING_C = 377; // 2π × 60
+
+  function roomRender() {
+    var ratio = roomLeft / ROOM_TOTAL;
+    ringProgress.style.strokeDashoffset = (RING_C * (1 - ratio)).toFixed(1);
+    ringTime.textContent = format(roomLeft);
+  }
+
+  function roomSetState(state) {
+    ringState.textContent = LABELS[state];
+    presenceText.textContent =
+      state === 'focus'  ? '你 · 同伴 正在共学' :
+      state === 'done'   ? '你们完成了一轮共学 ✨' :
+      state === 'paused' ? '已暂停，同伴还在等你' :
+                           '你 · 同伴 准备共学';
+  }
+
+  function roomTick() {
+    var now = Date.now();
+    roomLeft -= (now - roomLast);
+    roomLast = now;
+    if (roomLeft <= 0) {
+      roomLeft = 0;
+      roomRunning = false;
+      clearInterval(roomTimer);
+      roomToggleBtn.textContent = '再学一轮';
+      roomSetState('done');
+      room.classList.remove('focus');
+      room.classList.add('done');
+      roomRender();
+      return;
+    }
+    roomRender();
+  }
+
+  roomToggleBtn.addEventListener('click', function () {
+    if (roomLeft <= 0) { roomLeft = ROOM_TOTAL; room.classList.remove('done'); roomRender(); }
+    if (roomRunning) {
+      roomRunning = false;
+      clearInterval(roomTimer);
+      roomToggleBtn.textContent = '继续共学';
+      roomSetState('paused');
+      room.classList.remove('focus');
+    } else {
+      roomRunning = true;
+      roomLast = Date.now();
+      roomTimer = setInterval(roomTick, 100);
+      roomToggleBtn.textContent = '暂停';
+      roomSetState('focus');
+      room.classList.remove('done');
+      room.classList.add('focus');
+    }
+  });
+
+  roomResetBtn.addEventListener('click', function () {
+    roomLeft = ROOM_TOTAL;
+    roomRunning = false;
+    clearInterval(roomTimer);
+    roomToggleBtn.textContent = '开始共学';
+    roomSetState('idle');
+    room.classList.remove('focus', 'done');
+    roomRender();
+  });
+
+  roomRender();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "adhd-focus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "澄时 ClearTime — ADHD 学习辅助：AI 任务拆解 / 可视化计时器 / 共学",
+  "engines": {
+    "node": ">=18"
+  }
+}
